@@ -126,7 +126,7 @@ partial def words (s : String) : List String :=
  let rec aux (s : List Char) : List (List Char) :=
    match s.dropWhile (· = ' ') with
    | [] => []
-   | s => let (p, r) := s.span (· ≠ ' ') -- not ony space
+   | s => let (p, r) := s.span (· ≠ ' ')
           p :: aux r
  List.map List.asString $ aux s.toList
 
