@@ -210,15 +210,3 @@ def swedishPlural : String → DeclClass → String
 #eval swedishPlural "rad" DeclClass.Three
 #eval swedishPlural "åpple" DeclClass.Four
 #eval swedishPlural "hus" DeclClass.Five
-
-
-/-
-swedishPlural noun d = case d of
-  One   -> init noun ++ "or"
-  Two   -> init noun ++ "ar"
-  Three -> if  (last noun) `elem` swedishVowels
-           then noun ++ "r"
-           else noun ++ "er"
-  Four  -> noun ++ "n"
-  Five  -> noun
--/
