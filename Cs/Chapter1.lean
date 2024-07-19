@@ -99,7 +99,7 @@ def List.prefix [BEq a] (ps : List a) (xs : List a) : Bool :=
 def preprocess : String → String :=
  List.asString ∘
  List.map Char.toLower ∘
- List.filter (List.notElem · "?;:,.".toList) ∘
+ List.filter (! List.elem · "?;:,.".toList) ∘
  String.toList
 
 #eval preprocess sonnet73
@@ -123,16 +123,23 @@ end sort
 #eval insertionSort (· ≤ ·) ["white", "yellow", "black"]
 
 partial def words (s : String) : List String :=
+ let f : Char → Bool := (fun x => x.isWhitespace)
  let rec aux (s : List Char) : List (List Char) :=
-   match s.dropWhile (· = ' ') with
+   match s.dropWhile f with
    | [] => []
-   | s => let (p, r) := s.span (· ≠ ' ')
-          p :: aux r
+   | s => let (p, r) := s.span (not ∘ f); p :: aux r
  List.map List.asString $ aux s.toList
 
-#eval words " hello world  "
+#eval words "  the world is a stage  place "
 
 def process : String → List String :=
   insertionSort (· ≤ ·) ∘ List.eraseDups ∘ words
 
 #eval process sonnet18
+
+def cnt (s : String) : List (String × Nat) :=
+  let as := (process ∘ preprocess) s
+  let bs := (words ∘ preprocess) s
+  as.map (fun x => (x, count x bs)) |>.filter (·.snd > 1)
+
+#eval cnt $ sonnet73
