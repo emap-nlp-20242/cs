@@ -96,6 +96,8 @@ def List.prefix [BEq a] (ps : List a) (xs : List a) : Bool :=
 
 #eval "hello".toList.prefix "hello world".toList
 
+/- Basic Statistics -/
+
 def preprocess : String → String :=
  List.asString ∘
  List.map Char.toLower ∘
@@ -105,7 +107,7 @@ def preprocess : String → String :=
 #eval preprocess sonnet73
 
 
-section sort
+section InsertSort
 
 variable {α : Type u} (r : α → α → Prop) [DecidableRel r]
 local infixl:50 " ≼ " => r
@@ -118,11 +120,11 @@ def insertionSort [LE α] : List α → List α
   | [] => []
   | b :: l => orderedInsert r b (insertionSort l)
 
-end sort
+end InsertSort
 
 #eval insertionSort (· ≤ ·) ["white", "yellow", "black"]
 
-partial def words (s : String) : List String :=
+partial def words₁ (s : String) : List String :=
  let f : Char → Bool := (fun x => x.isWhitespace)
  let rec aux (s : List Char) : List (List Char) :=
    match s.dropWhile f with
@@ -130,16 +132,93 @@ partial def words (s : String) : List String :=
    | s => let (p, r) := s.span (not ∘ f); p :: aux r
  List.map List.asString $ aux s.toList
 
-#eval words "  the world is a stage  place "
+def words₂ (s : String) : List String :=
+  s.split (·.isWhitespace) |>.filter (· ≠ "")
+
+#eval words₁ "hi"
+#eval words₁ "\rhello\nworld\t!\n\t"
+#eval words₁ " the  greeness of the grass on the other  side "
+#eval words₂ " the  greeness of the grass on the other  side "
 
 def process : String → List String :=
-  insertionSort (· ≤ ·) ∘ List.eraseDups ∘ words
-
-#eval process sonnet18
+  insertionSort (· ≤ ·) ∘ List.eraseDups ∘ words₂
 
 def cnt (s : String) : List (String × Nat) :=
   let as := (process ∘ preprocess) s
-  let bs := (words ∘ preprocess) s
+  let bs := (words₂ ∘ preprocess) s
   as.map (fun x => (x, count x bs)) |>.filter (·.snd > 1)
 
-#eval cnt $ sonnet73
+#eval cnt sonnet73
+
+
+/- Finnish Vowel Harmony -/
+
+def db := [('ä', 'a'), ('ö', 'o'), ('y', 'u')]
+
+def back (c : Char) : Char :=
+ let m := db.toAssocList'
+  match m.find? c with
+  | some x => x
+  | none => c
+
+def front (c : Char) : Char :=
+ let m := db.map (fun x => (x.snd,x.fst)) |>.toAssocList'
+ match m.find? c with
+ | some x => x
+ | none => c
+
+def appendSuffixF : String → String → String
+  | stem, suffix => stem ++ suffix.map (vh stem)
+ where
+  vh s :=
+   if s.any (· ∈ "aou".toList) then back
+   else if s.any (· ∈ ['ä', 'ö', 'y']) then front else id
+
+#eval appendSuffixF "pouta" "na"
+#eval appendSuffixF "koti" "na"
+#eval appendSuffixF "pöytä" "na"
+
+
+/- Swedish morphology -/
+
+inductive DeclClass where
+  | One
+  | Two
+  | Three
+  | Four
+  | Five
+
+def swedishVowels := ['a','i','o','u','e','y','ä','å','ö','ø']
+
+def String.init (s : String) : String :=
+  s.dropRight 1
+
+def swedishPlural : String → DeclClass → String
+ | noun, d => match d with
+  | DeclClass.One   => noun.init ++ "or"
+  | DeclClass.Two   => noun.init ++ "ar"
+  | DeclClass.Three => if noun.back ∈ swedishVowels
+                       then noun ++ "r"
+                       else noun ++ "er"
+  | DeclClass.Four  => noun ++ "n"
+  | DeclClass.Five  => noun
+
+#eval swedishPlural "ficka" DeclClass.One
+#eval swedishPlural "blomma" DeclClass.One
+#eval swedishPlural "pojke" DeclClass.Two
+#eval swedishPlural "ko" DeclClass.Three
+#eval swedishPlural "rad" DeclClass.Three
+#eval swedishPlural "åpple" DeclClass.Four
+#eval swedishPlural "hus" DeclClass.Five
+
+
+/-
+swedishPlural noun d = case d of
+  One   -> init noun ++ "or"
+  Two   -> init noun ++ "ar"
+  Three -> if  (last noun) `elem` swedishVowels
+           then noun ++ "r"
+           else noun ++ "er"
+  Four  -> noun ++ "n"
+  Five  -> noun
+-/
