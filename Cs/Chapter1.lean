@@ -1,4 +1,3 @@
-
 import Lean
 
 def square : Int → Int
@@ -122,7 +121,16 @@ def insertionSort [LE α] : List α → List α
 
 end InsertSort
 
+section
+
+set_option profiler true
+set_option trace.profiler.output.pp true
+set_option profiler.threshold 2
+
 #eval insertionSort (· ≤ ·) ["white", "yellow", "black"]
+#eval insertionSort (· ≤ ·) $ List.iota 1000
+
+end
 
 partial def words₁ (s : String) : List String :=
  let f : Char → Bool := (fun x => x.isWhitespace)
@@ -139,6 +147,8 @@ def words₂ (s : String) : List String :=
 #eval words₁ "\rhello\nworld\t!\n\t"
 #eval words₁ " the  greeness of the grass on the other  side "
 #eval words₂ " the  greeness of the grass on the other  side "
+
+
 
 def process : String → List String :=
   insertionSort (· ≤ ·) ∘ List.eraseDups ∘ words₂
