@@ -75,7 +75,7 @@ def indexing : IO (Lean.HashMap String (List Nat)) := do
  return idx
 
 #eval Functor.map (·.toList |>.length) indexing
-#eval Functor.map (·.toList) indexing
+#eval (·.toList) <$> indexing
 
 def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
  : IO (List Nat) := do
