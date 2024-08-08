@@ -13,6 +13,10 @@ def words (s : String) : List String :=
 def preProc (s : String) (n : Nat) : Array (Prod String Nat) :=
   words s |>.toArray |>.map (·, n)
 
+def readContent (lines : List String) : (List String × List String) :=
+  let (head, content) := lines.dropWhile (· != "---") |>.drop 1 |>.span (· != "---")
+  (head, content.drop 1)
+
 /-
 instance : Ord (Prod String Nat) where
   compare a b := (compare a.1 b.1).then (compare a.2 b.2)
@@ -72,17 +76,43 @@ def indexFiles
   := do
     let mut mdict := dict
     for d in docs do
-      mdict ← indexFile mdict (folder.join s!"{d}.text") d
-    return mdict.toList
-
-
-def docs := [10,100,200,12,44,20,13,202,201,301,310,403]
-
-#eval indexFiles Lean.HashMap.empty "/Users/ar/r/cpdoc/dhbb/text" docs
+      mdict ← indexFile mdict (folder.join s!"{d}.raw") d
+    return mdict
 
 inductive Query where
  | w : String → Query
  | and : Query → Query → Query
  deriving Repr
 
-#eval Query.and (Query.w "teste") (Query.w "agora")
+
+def merge : List Nat → List Nat → List Nat
+ | [], _ => []
+ | _, [] => []
+ | a :: l1, b :: l2 =>
+   if a == b then
+     a :: merge l1 l2
+   else if a < b then
+     merge l1 (b :: l2)
+   else merge (a :: l1) l2
+
+def eval (q: Query) (idx : Lean.HashMap String (List Nat)) : List Nat :=
+  match q with
+  | Query.w w => match idx.find? w with
+    | none => []
+    | some l => l
+  | Query.and q1 q2 => merge (eval q1 idx) (eval q2 idx)
+
+def indexing : IO (Lean.HashMap String (List Nat)) := do
+ let docs := [10,100,200,12,44,20,60,13,202,201,301,310,403]
+ let idx ← indexFiles Lean.HashMap.empty "/Users/ar/r/cpdoc/dhbb-nlp/raw" docs
+ return idx
+
+#eval Functor.map (·.toList |>.length) indexing
+#eval Functor.map (·.toList) indexing
+
+def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
+ : IO (List Nat) := do
+ let db ← idx
+ return eval q db
+
+#eval mainInterface indexing (Query.and (Query.w "ordinário") (Query.w "candidato"))
