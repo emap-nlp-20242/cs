@@ -1,5 +1,7 @@
 import Lean
 
+namespace Chapter1
+
 def square : Int → Int
 | x => x * x
 
@@ -86,7 +88,7 @@ def average₂ (xs : List Int) : Lean.Rat :=
 
 #eval average₂ $ List.iota 456 |>.map Int.ofNat
 
-def List.prefix [BEq a] (ps : List a) (xs : List a) : Bool :=
+def _root_.List.prefix [BEq a] (ps : List a) (xs : List a) : Bool :=
   let rec aux : List a → List a → Bool
   | [], _ => true
   | _, [] => false
@@ -200,7 +202,7 @@ inductive DeclClass where
 
 def swedishVowels := ['a','i','o','u','e','y','ä','å','ö','ø']
 
-def String.init (s : String) : String :=
+def _root_.String.init (s : String) : String :=
   s.dropRight 1
 
 def swedishPlural : String → DeclClass → String
@@ -220,3 +222,5 @@ def swedishPlural : String → DeclClass → String
 #eval swedishPlural "rad" DeclClass.Three
 #eval swedishPlural "åpple" DeclClass.Four
 #eval swedishPlural "hus" DeclClass.Five
+
+end Chapter1
