@@ -100,4 +100,4 @@ def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
  let db ← idx
  return eval q db
 
-#eval mainInterface indexing (Query.and (Query.w "senador") (Query.w "voto"))
+#eval mainInterface indexing (Query.and (Query.w "senadores") (Query.w "votos"))
