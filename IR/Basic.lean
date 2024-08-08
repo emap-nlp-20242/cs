@@ -44,19 +44,6 @@ def insertPair [BEq α] [BEq β] [Ord β] [Hashable α]
     | none => [p.2]
     | some l => orderedInsert p.2 l)
 
-/-
-def orderedInsert : Nat → List Nat → List Nat
-  | a, [] => [a]
-  | a, b :: l => if a ≤ b
-    then a :: b :: l else b :: orderedInsert a l
-
-def insertPair (m : IndexMap) (p : String × Nat) : IndexMap
-  := m.insert p.1 (match m.find? p.1 with
-    | none => [p.2]
-    | some l => orderedInsert p.2 l)
--/
-
-
 def indexDoc
  (dict : Lean.HashMap String (List Nat))
  (pairs : Array (String × Nat)) : Lean.HashMap String (List Nat) :=
@@ -89,10 +76,8 @@ def merge : List Nat → List Nat → List Nat
  | [], _ => []
  | _, [] => []
  | a :: l1, b :: l2 =>
-   if a == b then
-     a :: merge l1 l2
-   else if a < b then
-     merge l1 (b :: l2)
+   if     a == b then a :: merge l1 l2
+   else if a < b then merge l1 (b :: l2)
    else merge (a :: l1) l2
 
 def eval (q: Query) (idx : Lean.HashMap String (List Nat)) : List Nat :=
@@ -103,7 +88,7 @@ def eval (q: Query) (idx : Lean.HashMap String (List Nat)) : List Nat :=
   | Query.and q1 q2 => merge (eval q1 idx) (eval q2 idx)
 
 def indexing : IO (Lean.HashMap String (List Nat)) := do
- let docs := [10,100,200,12,44,20,60,13,202,201,301,310,403]
+ let docs := [1,2,3,4,5,6,7,8,9,10,100,101,102,103,104,105,106,107,108,109,110]
  let idx ← indexFiles Lean.HashMap.empty "/Users/ar/r/cpdoc/dhbb-nlp/raw" docs
  return idx
 
@@ -115,4 +100,4 @@ def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
  let db ← idx
  return eval q db
 
-#eval mainInterface indexing (Query.and (Query.w "ordinário") (Query.w "candidato"))
+#eval mainInterface indexing (Query.and (Query.w "senador") (Query.w "voto"))
