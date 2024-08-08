@@ -1,10 +1,6 @@
 import Lean
 
-def doc1 : String := "I did enact Julius Caesar: I was killed i’ the
- Capitol; Brutus killed me."
-
-def doc2 : String := "So let it be 2024 with Caesar. The noble Brutus hath
- told you Caesar was ambitious:"
+/- indexing -/
 
 def words (s : String) : List String :=
   s.split (fun x => x.isWhitespace || ".,;:!?«»()[]“”".contains x)
@@ -12,21 +8,6 @@ def words (s : String) : List String :=
 
 def preProc (s : String) (n : Nat) : Array (Prod String Nat) :=
   words s |>.toArray |>.map (·, n)
-
-def readContent (lines : List String) : (List String × List String) :=
-  let (head, content) := lines.dropWhile (· != "---") |>.drop 1 |>.span (· != "---")
-  (head, content.drop 1)
-
-/-
-instance : Ord (Prod String Nat) where
-  compare a b := (compare a.1 b.1).then (compare a.2 b.2)
--/
-def test := (preProc doc1 1) ++ (preProc doc2 2)
-
-/- Can it be simpler? -/
-#eval test.qsort (fun x y => Ordering.isLT $ @compare _ lexOrd x y)
-#eval test.qsort (fun x y => x.1 < y.1 || (x.1 == y.1 && x.2 < y.2))
-
 
 def orderedInsert [BEq α] [Ord α] : α → List α → List α
   | a, [] => [a]
@@ -49,8 +30,6 @@ def indexDoc
  (pairs : Array (String × Nat)) : Lean.HashMap String (List Nat) :=
  Array.foldl insertPair dict pairs
 
-#eval indexDoc Lean.HashMap.empty test |>.toList
-
 def indexFile (dict : Lean.HashMap String (List Nat))
   (filename : System.FilePath) (doc : Nat)
   : IO (Lean.HashMap String (List Nat)) := do
@@ -66,11 +45,12 @@ def indexFiles
       mdict ← indexFile mdict (folder.join s!"{d}.raw") d
     return mdict
 
+/- query execution -/
+
 inductive Query where
  | w : String → Query
  | and : Query → Query → Query
  deriving Repr
-
 
 def merge : List Nat → List Nat → List Nat
  | [], _ => []
@@ -87,6 +67,8 @@ def eval (q: Query) (idx : Lean.HashMap String (List Nat)) : List Nat :=
     | some l => l
   | Query.and q1 q2 => merge (eval q1 idx) (eval q2 idx)
 
+/- testing -/
+
 def indexing : IO (Lean.HashMap String (List Nat)) := do
  let docs := [1,2,3,4,5,6,7,8,9,10,100,101,102,103,104,105,106,107,108,109,110]
  let idx ← indexFiles Lean.HashMap.empty "/Users/ar/r/cpdoc/dhbb-nlp/raw" docs
@@ -100,4 +82,6 @@ def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
  let db ← idx
  return eval q db
 
-#eval mainInterface indexing (Query.and (Query.w "senadores") (Query.w "votos"))
+def dhbb : Query → IO (List Nat) := mainInterface indexing
+
+#eval dhbb (Query.and (Query.w "senadores") (Query.w "votos"))
