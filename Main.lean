@@ -1,4 +1,4 @@
-import «Cs»
+import «CS»
 import «IR»
 
 set_option maxRecDepth 100000 in
