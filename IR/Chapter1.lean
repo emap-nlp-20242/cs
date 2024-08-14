@@ -92,8 +92,8 @@ def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
 
 def dhbb : Query → IO (List Nat) := mainInterface indexing
 
-#eval dhbb (Query.and (Query.or (Query.w "presidente") (Query.w "senador"))
-                      (Query.w "voto"))
+#eval dhbb (Query.and (Query.or (Query.w "licitação") (Query.w "compra"))
+                      (Query.w "presidente"))
 
 
 end IR.Chapter1
