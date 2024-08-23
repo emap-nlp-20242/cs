@@ -18,20 +18,28 @@ def insertSorted [BEq α] [Ord α] : α → List α → List α
     else
      b :: insertSorted a l
 
+structure Posting (a : Type) where
+  size : Nat
+  posts : List a
+ deriving Repr
+
 def insertPair [BEq α] [BEq β] [Ord β] [Hashable α]
-  (m : Lean.HashMap α (List β)) (p : α × β) : Lean.HashMap α (List β)
-  := m.insert p.1 (match m.find? p.1 with
-    | none => [p.2]
-    | some l => insertSorted p.2 l)
+  (m : Lean.HashMap α (Posting β))
+  (p : α × β) : Lean.HashMap α (Posting β) :=
+  m.insert p.1 (match m.find? p.1 with
+    | none => { size := 1, posts := [p.2] }
+    | some l => { size := l.size + 1, posts := insertSorted p.2 l.posts})
 
 def indexDoc
- (dict : Lean.HashMap String (List Nat)) (txt : String) (doc : Nat)
- : Lean.HashMap String (List Nat) :=
+ (dict : Lean.HashMap String (Posting Nat))
+ (txt : String)
+ (doc : Nat)
+ : Lean.HashMap String (Posting Nat) :=
  Array.foldl insertPair dict $ (words txt) |>.map ((· , doc)) |>.toArray
 
 def indexFiles
-  (dict : Lean.HashMap String (List Nat))
-  (docs : Array System.FilePath) : IO (Lean.HashMap String (List Nat))
+  (dict : Lean.HashMap String (Posting Nat))
+  (docs : Array System.FilePath) : IO (Lean.HashMap String (Posting Nat))
   := do
     let mut mdict := dict
     let enum := (fun as => (List.iota as.size |>.reverse.toArray).zip as)
@@ -48,38 +56,43 @@ inductive Query where
  | or : Query → Query → Query
  deriving Repr
 
+def intersect₁ : List Nat → List Nat → List Nat → List Nat
+ | [], _, acc => acc
+ | _, [], acc => acc
+ | (a :: l1), (b :: l2), acc =>
+   if     a == b then intersect₁ l1 l2 (a :: acc)
+   else if a < b then intersect₁ l1 (b :: l2) acc
+   else intersect₁ (a :: l1) l2 acc
+
+def intersect₂ (ass : List (List Nat)) : List Nat := sorry
+
 def intersect : List Nat → List Nat → List Nat
- | [], _ => []
- | _, [] => []
- | a :: l1, b :: l2 =>
-   if     a == b then a :: intersect l1 l2
-   else if a < b then intersect l1 (b :: l2)
-   else intersect (a :: l1) l2
+ | as, bs => intersect₁ as bs []
 
 def union₁ (a b : List Nat) (acc : List Nat) : List Nat :=
  match a, b with
  | [], l2 => l2.reverse ++ acc
  | l1, [] => l1.reverse ++ acc
- | a :: l1, b :: l2 =>
+ | a :: l1, m@(b :: l2) =>
    if     a == b then union₁ l1 l2 (a :: acc)
-   else if a < b then union₁ l1 (b :: l2) (a :: acc)
+   else if a < b then union₁ l1 m (a :: acc)
    else union₁ (a :: l1) l2 (b :: acc)
 
 def union (a b : List Nat) : List Nat :=
   (union₁ a b []).reverse
 
-def eval (q: Query) (idx : Lean.HashMap String (List Nat)) : List Nat :=
+def eval (q: Query) (idx : Lean.HashMap String (Posting Nat)) : List Nat :=
   match q with
   | Query.w w => match idx.find? w with
     | none => []
-    | some l => l
+    | some p => p.posts
   | Query.and q1 q2 => intersect (eval q1 idx) (eval q2 idx)
   | Query.or q1 q2 => union (eval q1 idx) (eval q2 idx)
 
 
 /- testing -/
 
-def indexing : IO (Lean.HashMap String (List Nat)) := do
+def indexing : IO (Lean.HashMap String (Posting Nat)) := do
  let files ← System.FilePath.walkDir "/Users/ar/r/cpdoc/dhbb-nlp/raw"
  let names := files.filter (fun x => match x.fileName with
    | none => false
@@ -88,9 +101,9 @@ def indexing : IO (Lean.HashMap String (List Nat)) := do
  return idx
 
 #eval Functor.map (·.toList |>.length) indexing
-#eval (·.toList) <$> indexing
+-- #eval (·.toList) <$> indexing
 
-def mainInterface (idx : IO (Lean.HashMap String (List Nat))) (q : Query)
+def mainInterface (idx : IO (Lean.HashMap String (Posting Nat))) (q : Query)
  : IO (List Nat) := do
  let db ← idx
  return eval q db

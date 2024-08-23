@@ -1,10 +1,11 @@
 
 namespace Chapter3
 
+
 def rotations (s : String) : List String :=
  List.map (λ n => s.drop n ++ s.take n) (List.range s.length)
 
-#eval rotations "recuperação$"
+#eval rotations "fi*mo*er*ble$"
 
 def tails : List a → List (List a)
 | [] => [[]]
