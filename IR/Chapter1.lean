@@ -6,7 +6,10 @@ namespace IR.Chapter1
 
 def words (s : String) : List String :=
   s.split (fun x => x.isWhitespace || ".,;:!?«»()[]“”".contains x)
-  |>.filter (· ≠ "") |>.map String.toLower
+  |>.foldr step []
+  where
+    step w acc := if w ≠ "" then w.toLower :: acc else acc
+
 
 def insertSorted [BEq α] [Ord α] : α → List α → List α
   | a, [] => [a]
@@ -96,11 +99,11 @@ def indexing : IO (Lean.HashMap String (Posting Nat)) := do
  let files ← System.FilePath.walkDir "/Users/ar/r/cpdoc/dhbb-nlp/raw"
  let names := files.filter (fun x => match x.fileName with
    | none => false
-   | some nm => nm.startsWith "7" && nm.endsWith "raw")
+   | some nm => nm.startsWith "6" && nm.endsWith "raw")
  let idx ← indexFiles Lean.HashMap.empty names
  return idx
 
-#eval Functor.map (·.toList |>.length) indexing
+-- #eval Functor.map (·.toList |>.length) indexing
 -- #eval (·.toList) <$> indexing
 
 def mainInterface (idx : IO (Lean.HashMap String (Posting Nat))) (q : Query)

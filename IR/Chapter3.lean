@@ -5,7 +5,7 @@ namespace Chapter3
 def rotations (s : String) : List String :=
  List.map (λ n => s.drop n ++ s.take n) (List.range s.length)
 
-#eval rotations "fi*mo*er*ble$"
+#eval rotations "teef*te$"
 
 def tails : List a → List (List a)
 | [] => [[]]
@@ -18,7 +18,7 @@ def grams (n : Nat) (s : String) : List String :=
   List.filter (fun x => x.length == n) ∘ List.map (fun x => x.take n)
    $ (tails s.toList) |>.map (fun x => x.asString)
 
-#eval grams 3 "recuperação"
+#eval grams 2 "agora recuperação"
 
 
 end Chapter3

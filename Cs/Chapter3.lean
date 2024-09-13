@@ -1,6 +1,8 @@
 import Lean
 
-namespace Chapter1
+namespace Chapter3
+
+-- 3.3 First Experiments
 
 def square : Int → Int
 | x => x * x
@@ -15,6 +17,9 @@ def hword (s : String) : Bool :=
 
 #eval hword "hello"
 #eval hword "trip"
+
+
+-- 3.5 Recursion
 
 def gen (n : Nat) : String :=
  match n with
@@ -223,4 +228,4 @@ def swedishPlural : String → DeclClass → String
 #eval swedishPlural "åpple" DeclClass.Four
 #eval swedishPlural "hus" DeclClass.Five
 
-end Chapter1
+end Chapter3
