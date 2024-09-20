@@ -4,10 +4,51 @@ namespace Chapter3
 
 -- 3.3 First Experiments
 
-def square : Int → Int
-| x => x * x
+/- página 35
+Calcular quantos dias tem um ano bissexto
+-/
+#eval 366 * 24 * 60 * 60
 
-#eval square 12
+/- página 36
+Exercise 3.1
+Try out a few calculations using * for multiplication, + for addition, - for
+subtraction, ^ for exponentiation, / for division. By playing with the system,
+find out what the precedence order is among these operators
+
+Sugestão: Fazer demontrações de algumas das propriedades de cada operação
+a + b = b + a
+-/
+#eval (2+3)^4
+/-
+Exercise 3.2
+How much is 2^3^4? Does the interpreter read this as (2^3)^4 or as
+2^(3^4)?
+
+Answer: 2^3^4 is interpreted as 2^(3^4)
+-/
+#eval 2^3^4
+#eval (2^3)^4
+#eval 2^(3^4)
+
+-- Usando expressão lambda
+#eval (λ x => x * x) 4
+
+-- definindo função
+def square : Int → Int
+  | x => x * x
+#eval square (-3)
+
+#eval square (square 2)
+
+#eval square (square (square 2))
+
+/- página 37
+[’H’,’e’,’l’,’l’,’o’,’ ’,’W’,’o’,’r’,’l’,’d’,’!’]
+
+’H’:’e’:’l’:’l’:’o’:’ ’:’w’:’o’:’r’:’l’:’d’:’!’:[]
+Exercise 3.3
+The colon : in the last example is an operator. Can you see what its type is?
+-/
 
 def hword (s : String) : Bool :=
  let rec aux : List Char → Bool
@@ -17,7 +58,28 @@ def hword (s : String) : Bool :=
 
 #eval hword "hello"
 #eval hword "trip"
+#eval hword "shirimptoast"
 
+/- página 38
+1. Dúvida
+Infix operation and Prefix operation
+
+Exercise 3.4
+Which property does (>3) denote? And which property does (3>) denote?
+-/
+
+-- 3.4 Type Polymorphism
+-- Implicit Arguments (Functional Programming in Lean 1.6 Polymorphism )
+def Identity {α : Type} (x : α) : α := x
+#eval Identity 4
+#check (Identity)
+#eval Identity (hword "haskel")
+#eval Identity (hword "lean")
+#eval (Identity hword) "haskel"
+#eval (Identity hword) "lean"
+
+#eval [2,3] ++ [4,7]
+#eval "Hello" ++ " World!"
 
 -- 3.5 Recursion
 
@@ -25,11 +87,66 @@ def gen (n : Nat) : String :=
  match n with
  | Nat.zero => "Sentences can go on"
  | Nat.succ n => gen n ++ " and on"
-
+/-
+def gen : Nat → String
+  | 0 => "Sentences can go on"
+  | .succ n => gen n ++ ", and on"
+-/
 def genS (n : Nat) : String :=
  gen n ++ "."
 
-#eval genS 3
+ #eval genS 3
+
+def story (k : Nat) : String :=
+  match k with
+  | Nat.zero => "Let’s cook and eat that final missionary, and off to bed."
+  | Nat.succ k => "The night was pitch dark, mysterious and deep. "
+      ++ "Ten cannibals were seated around a boiling cauldron. "
+      ++ "Their leader got up and addressed them like this: ’"
+      ++ story (k) ++ "’"
+
+#eval story 2
+
+/- página 41
+Exercise 3.5
+What happens if you ask for putStrLn (story (-1))? Why?
+Answer:
+
+Exercise 3.6
+Why is the definition of ‘GNU’ as ‘GNU’s Not Unix’ not a recursive definition?
+-/
+
+-- 3.6 List Types and List Comprehension
+
+/- página 42
+in Haskel
+[0 ..] ← Lista infinita   ['a' .. 'g'] ← [ 'a' , 'b' , ... , 'f' , 'g']
+Slice in list, like [1 .. 42] ⇒ [1, 2, 3, ... , 41, 42]
+def numbers : List Nat := [1 .. 42]
+#eval numbers
+
+def oddslessthanten : List Nat :=  [ n | n ← [1 .. 10] , odd ]
+#eval oddslessthanten
+-/
+
+-- 3.7 List processing with map and filter
+
+def sum (α : Nat) ( β : Nat ) : Nat :=
+  α + β
+
+def NatUnderTen : List Nat := [1, 2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,10]
+#eval NatUnderTen.map (sum 1)
+
+def Adjectives : List String := [ "friendly" , "believable" ]
+#eval (Adjectives).map ("un".append)
+
+#eval ["fish","and","chips"].map hword
+
+#eval NatUnderTen.filter (· % 2 == 0)
+
+-- 3.8 Function Composition, Conjunction, Disjunction, Quantification
+
+
 
 def reversal (s : String) : String :=
  let rec aux : List Char → List Char
