@@ -146,7 +146,35 @@ def Adjectives : List String := [ "friendly" , "believable" ]
 
 -- 3.8 Function Composition, Conjunction, Disjunction, Quantification
 
+-- Apresento uma definição para composição de funções
+def comp {α β γ : Type} (f : β → γ) (g : α → β) : α → γ := λ x =>  f (g x)
 
+def cubic (a : Int ) : Int :=
+  a * a * a
+#eval cubic 2
+#eval comp (square) (cubic) 2
+
+
+-- Utilizando composição com operador padrão do L∃AN
+def f : Nat → Nat := λ x => x + 1
+def g : Nat → Nat := λ x => x * 2
+#eval (f ∘ g) 3
+
+
+-- Definições de any e all no Lean Padrão
+def any : List α → (α → Bool) → Bool
+  | [], _ => false
+  | h :: t, p => p h || any t p
+
+def all : List α → (α → Bool) → Bool
+  | [], _ => true
+  | h :: t, p => p h && all t p
+
+-- Exemplos
+#eval all ["fish","and","chips"] hword
+#eval ["fish","and","chips"].all hword
+
+-- 3.9 Type Classes
 
 def reversal (s : String) : String :=
  let rec aux : List Char → List Char
