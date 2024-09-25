@@ -175,6 +175,80 @@ def all : List α → (α → Bool) → Bool
 #eval ["fish","and","chips"].all hword
 
 -- 3.9 Type Classes
+-- Definição not equal
+def neq {α : Type} [DecidableEq α] (x y : α) : Bool := x ≠ y
+/- página 46
+Exercise 3.7
+Check the type of the function (\ x y -> x /= y) in Haskell. What do
+you expect? What do you get? Can you explain what you get?
+-/
+#check (neq)
+
+/-Exercise 3.8
+Is there a difference between (\ x y -> x /= y) and (/=)?
+-/
+
+/- Exercise 3.9
+Check the type of the function composition all . (/=). If you were to
+give this function a name, what name would be appropriate?
+-/
+def list_all_neq {α : Type} [DecidableEq α] (x : α) (l : List α) : Bool :=
+  l.all (λ y => x ≠ y)
+
+#check (list_all_neq)
+
+/- Exercise 3.10
+Check the type of the function composition any . (==). If you were to
+give this function a name, what name would be appropriate?
+-/
+def list_any_eq {α : Type} [DecidableEq α ] (x: α )(l : List α ) : Bool :=
+  l.all (λ y => x ≠ y)
+
+#check (list_any_eq)
+
+/- Obs:
+Esses exercicios do livro tentam ilustrar o fato da restrição [DecidableEq α ] necessária
+para as funções que verificam igualdade e/ou desigualdade
+-/
+
+/- Exercise 3.11
+How would you go about testing two infinite strings for equality?
+-/
+
+/- Exercise 3.12
+Use min to define a function minList :: Ord a => [a] -> a for
+computing the minimum of a non-empty list.
+-/
+
+def minimum? [Min α] : List α → Option α
+  | []    => none
+  | a::as => some <| as.foldl min a
+
+#eval [ 9 , 9 , 4 , 7 , 0].minimum?
+
+/- Exercise 3.13
+Define a function delete that removes an occurrence of an object x from
+a list of objects in class Eq. If x does not occur in the list, the list remains unchanged.
+If x occurs more than once, only the first occurrence is deleted
+-/
+
+def delete {α : Type} [DecidableEq α]  (lista : List α ) (x : α) : List α  :=
+match lista with
+  | [] => lista
+  | (y::ys)  => if x = y then ys else y :: delete ys x
+
+#eval delete [1, 2, 3, 4, 3] 2
+#eval delete [1, 2, 3, 4] 3
+
+-- How would you need to change delete in order to delete every occurence of x?
+def delete_all {α : Type} [DecidableEq α]  (lista : List α ) (x : α) : List α  :=
+match lista with
+  | [] => lista
+  | (y::ys)  => if y = x then delete_all ys x else y :: (delete_all ys x)
+
+#eval delete_all [1, 1, 1 ,2 ,5 , 9, 8 ,1 ,2 ,5] 1
+
+--
 
 def reversal (s : String) : String :=
  let rec aux : List Char → List Char
