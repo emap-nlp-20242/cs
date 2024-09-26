@@ -224,7 +224,14 @@ def minimum? [Min α] : List α → Option α
   | []    => none
   | a::as => some <| as.foldl min a
 
-#eval [ 9 , 9 , 4 , 7 , 0].minimum?
+#eval minimum? [ 8 , 5 , 4 , 2 , 3 , 1]
+
+def minList { α : Type }[LT α] [DecidableRel (@LT.lt α _)] (l : List α) : Option α :=
+  match l with
+| [] => none
+| (x::xs) => some (xs.foldl (λ acc y => if y < acc then y else acc) x)
+
+#eval minList [ 9 , 9 , 4 , 7 , 0]
 
 /- Exercise 3.13
 Define a function delete that removes an occurrence of an object x from
@@ -248,7 +255,26 @@ match lista with
 
 #eval delete_all [1, 1, 1 ,2 ,5 , 9, 8 ,1 ,2 ,5] 1
 
---
+/- Exercise 3.14
+Define a function srt :: Ord a => [a] -> [a] that implements the
+above. Use the function minList from Exercise 3.12.
+-/
+/-
+def minNat  (l : List Nat) : Nat :=
+  []
+
+def sortNat (l : List Nat) : List Nat :=
+  match l with
+  | [] => []
+  | x::xs => l.minimum?
+
+def srt {α : Type} [Min α ] (k : List α ): List α :=
+  match k with
+| [] => []
+| x::xs => x.minimum? :: srt xs
+-/
+
+-- 3.10 Strings and Texts
 
 def reversal (s : String) : String :=
  let rec aux : List Char → List Char
