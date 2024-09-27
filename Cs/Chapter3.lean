@@ -282,10 +282,22 @@ def reversal (s : String) : String :=
  | x :: t => (aux t) ++ [x]
  (aux s.data).asString
 
+theorem reversal_empty : reversal "" = "" := by
+  unfold reversal -- Abrir a def de reversal
+  simp [String.data]
+  /-
+  String é uma lista de char, acessar .data para obter essa lsita
+  como estou avaliando "" (String vazia) recebo uma lista vazia
+  Uso a tática simp
+  -/
+  rfl
+
 def reversal' (s : String) : String :=
  s.data.reverse.asString
 
 #eval reversal "hello"
+#eval  reversal (reversal "Chomsky")
+-- Provar reversal (reversal s) = s
 
 def sonnet18 : String :=
  "Shall I compare thee to a summer's day? \n"
