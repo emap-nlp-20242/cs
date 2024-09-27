@@ -31,14 +31,37 @@ def genS (n : Nat) : String :=
 
 #eval genS 3
 
-def reversal (s : String) : String :=
- let rec aux : List Char → List Char
+def reversal₁ : List a → List a
  | [] => []
- | x :: t => (aux t) ++ [x]
- (aux s.data).asString
+ | x :: xs => reversal₁ xs ++ [x]
 
-def reversal' (s : String) : String :=
- s.data.reverse.asString
+def reversal (s : String) : String :=
+ (reversal₁ s.data).asString
+
+theorem reverse_append' {α : Type} :
+  ∀ xs ys : List α,
+    reversal₁ (xs ++ ys) = reversal₁ ys ++ reversal₁ xs := by
+  intro xs ys
+  induction xs with
+  | nil => simp [reversal₁]
+  | cons x xs ih =>
+    simp [reversal₁]
+    simp [ih]
+
+@[simp] theorem reverse_append {α : Type} :
+  ∀ xs ys : List α,
+    reversal₁ (xs ++ ys) = reversal₁ ys ++ reversal₁ xs
+ |      [], ys => by simp [reversal₁,List.nil_append]
+ | x :: xs, ys => by
+  simp [reversal₁]
+  simp [reverse_append xs]
+
+theorem rev_rev {a : Type} (xs : List a) :
+  reversal₁ (reversal₁ (xs)) = xs := by
+  induction xs with
+  | nil => simp [reversal₁.eq_1]
+  | cons x xs ih =>
+    simp [reversal₁,ih]
 
 #eval reversal "hello"
 

@@ -9,3 +9,5 @@ set_option maxRecDepth 100000 in
 def main : IO Unit := do
   let ls ← dhbb (Query.and (Query.w "senadores") (Query.w "votos"))
   IO.println ls
+
+ 
