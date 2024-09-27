@@ -338,6 +338,7 @@ def count {α : Type} [BEq α] : α → List α → ℕ
 | _, [] => 0
 | x, y :: ys => if x == y then 1 + count x ys else count x ys
 
+#eval count 'e' sonnet73.toList
 #eval count 'e' "teletransport".toList
 
 def average₁ (xs : List Nat) : Float :=
@@ -349,6 +350,38 @@ def average₂ (xs : List Int) : Lean.Rat :=
  Lean.mkRat (xs.foldl (·  + ·) 0) xs.length
 
 #eval average₂ $ List.iota 456 |>.map Int.ofNat
+
+/- Exercise 3.16 página 51
+Write a function to compute the average word length in Shakespeare’s sonnets 18 and 73.
+You can use filter (‘notElem‘ "?;:,.") to get rid of the interpunction signs.
+The predefined function length (from the List module) gives the length of a
+list.
+-/
+def words (s : String) : List String :=
+  s.split (fun x => x.isWhitespace || ".,;:!?«»()[]“”".contains x)
+  |>.foldr step []
+  where
+    step w acc := if w ≠ "" then w.toLower :: acc else acc
+
+#eval words sonnet18
+#eval (words sonnet18).length
+
+def count_lenght_word (listwords : List String) : List Nat :=
+  listwords.map (λ s => s.length)
+
+#eval count_lenght_word (words sonnet18)
+
+def sum_list_elemnts (listNat : List Nat) : Nat :=
+  listNat.foldl (λ acc x => acc + x) 0
+
+#eval sum_list_elemnts (count_lenght_word (words sonnet18))
+
+def average_word_length (text : String) : Nat :=
+  sum_list_elemnts (count_lenght_word (words text)) / ((words sonnet18).length)
+
+#eval average_word_length sonnet73
+
+-- Verificar, acho que tem algum erro
 
 def _root_.List.prefix [BEq a] (ps : List a) (xs : List a) : Bool :=
   let rec aux : List a → List a → Bool
