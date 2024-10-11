@@ -309,7 +309,6 @@ theorem rev_rev {a : Type} (xs : List a) :
 
 #eval reversal "hello"
 #eval  reversal (reversal "Chomsky")
--- Provar reversal (reversal s) = s
 
 def sonnet18 : String :=
  "Shall I compare thee to a summer's day? \n"
@@ -389,7 +388,7 @@ def sum_list_elemnts (listNat : List Nat) : Nat :=
 #eval sum_list_elemnts (count_lenght_word (words sonnet18))
 
 def average_word_length (text : String) : Nat :=
-  sum_list_elemnts (count_lenght_word (words text)) / ((words sonnet18).length)
+  sum_list_elemnts ( (count_lenght_word (words text))) / ((words sonnet18).length)
 
 #eval average_word_length sonnet73
 
